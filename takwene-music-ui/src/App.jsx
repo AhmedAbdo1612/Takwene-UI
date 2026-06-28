@@ -129,7 +129,10 @@ function DashboardLayout({ isFullScreenLoading }) {
       {/* Mobile Drawer (Backdrop & Drawer content) */}
       <AnimatePresence>
         {isMobileOpen && (
-          <div className="fixed inset-0 z-50 md:hidden flex">
+          <motion.div 
+            key="mobile-sidebar-container"
+            className="fixed inset-0 z-50 md:hidden flex"
+          >
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -166,7 +169,7 @@ function DashboardLayout({ isFullScreenLoading }) {
                     onClick={() => setIsMobileOpen(false)} 
                     className="p-1.5 rounded-lg border border-card-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -211,7 +214,7 @@ function DashboardLayout({ isFullScreenLoading }) {
                 </p>
               </div>
             </motion.aside>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -224,7 +227,7 @@ function DashboardLayout({ isFullScreenLoading }) {
             {/* Mobile menu trigger */}
             <button 
               onClick={() => setIsMobileOpen(true)} 
-              className="md:hidden p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
+              className="md:hidden p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0 relative z-20"
             >
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
