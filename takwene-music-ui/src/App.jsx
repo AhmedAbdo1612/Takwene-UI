@@ -10,7 +10,8 @@ import Spinner from './components/Spinner';
 import Skeleton from './components/Skeleton';
 import LandingPage from './components/LandingPage';
 import TracksManager from './components/TracksManager';
-import { fetchDistributions } from './api/api';
+import DistributionsManager from './components/DistributionsManager';
+import DspsManager from './components/DspsManager';
 
 // Protected Route wrapper component using Outlet for nested routes matching
 function ProtectedRoute() {
@@ -92,6 +93,7 @@ function DashboardLayout({ isFullScreenLoading }) {
               { path: '/dashboard', label: 'Dashboard Control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
               { path: '/tracks', label: 'Track Catalog', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
               { path: '/distribution', label: 'DSP Deliveries', icon: 'M8.684 10.742l-2.777 1.111A1 1 0 015 11V5a1 1 0 01.908-.553l8-4A1 1 0 0115 1v6M17 11h.01M17 15h.01M17 19h.01M21 11h.01M21 15h.01M21 19h.01' },
+              { path: '/dsps', label: 'DSP Registry', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z' },
             ].map((item) => (
               <Link
                 key={item.path}
@@ -140,6 +142,7 @@ function DashboardLayout({ isFullScreenLoading }) {
               {currentPath === '/dashboard' && 'Dashboard Overview'}
               {currentPath === '/tracks' && 'Music Track Catalog'}
               {currentPath === '/distribution' && 'DSP Distribution Status'}
+              {currentPath === '/dsps' && 'DSP Registry'}
             </h2>
           </div>
 
@@ -212,15 +215,7 @@ export default function App() {
   const [isInlineLoading, setIsInlineLoading] = useState(false);
   const [simulatedApiStatus, setSimulatedApiStatus] = useState('idle');
   
-  // React Query hooks to consume live database endpoints
-  const { data: distributionsData = [], isLoading: isDistLoading, refetch: refetchDistributions } = useQuery({
-    queryKey: ['distributions'],
-    queryFn: fetchDistributions,
-    enabled: isAuthenticated && currentPath === '/distribution',
-  });
-
-  // No mock data fallbacks (Strictly using API data)
-  const displayDistributions = Array.isArray(distributionsData) ? distributionsData : [];
+  // Distributions query and state are handled inside DistributionsManager
 
   // Trigger fullscreen loader for 2 seconds
   const triggerFullScreenLoader = () => {
@@ -429,72 +424,10 @@ export default function App() {
           <Route path="/tracks" element={<TracksManager />} />
 
           {/* DSP Deliveries */}
-          <Route path="/distribution" element={
-            <motion.div
-              key="distribution"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-2xl font-bold tracking-tight">DSP Deliveries</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Audit trail of track distributions to Digital Service Providers.</p>
-                </div>
-                <button
-                  onClick={refetchDistributions}
-                  disabled={isDistLoading}
-                  className="flex items-center gap-1.5 border border-card-border bg-card hover:bg-muted text-foreground text-xs font-bold py-2 px-3.5 rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer"
-                >
-                  {isDistLoading && <Spinner size="sm" />}
-                  Refresh Table
-                </button>
-              </div>
+          <Route path="/distribution" element={<DistributionsManager />} />
 
-              {isDistLoading ? (
-                <Skeleton variant="list" count={4} />
-              ) : (
-                <div className="border border-card-border bg-card rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-muted/50 border-b border-card-border text-muted-foreground font-bold tracking-wide uppercase">
-                          <th className="p-4">Track Info</th>
-                          <th className="p-4">Provider</th>
-                          <th className="p-4">Status</th>
-                          <th className="p-4">Delivery Date</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-card-border/80">
-                        {displayDistributions.map((item, idx) => {
-                          const trackTitle = item.trackTitle || item.TrackTitle || item.track?.title || item.Track?.Title || 'Unknown Track';
-                          const dsp = typeof item.dsp === 'object' ? (item.dsp?.name || item.dsp?.Name) : (item.dsp || item.Dsp || 'Unknown DSP');
-                          const status = item.status || item.Status || 'Pending';
-                          const date = item.date || item.Date || item.deliveredAt || item.DeliveredAt || item.createdAt || item.CreatedAt || 'N/A';
-                          return (
-                            <tr key={idx} className="hover:bg-muted/20 transition-colors duration-150">
-                              <td className="p-4 font-bold">{trackTitle}</td>
-                              <td className="p-4 font-semibold text-primary">{dsp}</td>
-                              <td className="p-4">
-                                <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                                  status === 'Delivered' ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning'
-                                }`}>
-                                  {status}
-                                </span>
-                              </td>
-                              <td className="p-4 text-muted-foreground font-medium">{date}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          } />
+          {/* DSP Registry */}
+          <Route path="/dsps" element={<DspsManager />} />
 
         </Route>
       </Route>

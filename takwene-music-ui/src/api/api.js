@@ -139,6 +139,17 @@ export const createDistribution = async (distData) => {
 };
 
 /**
+ * Update an existing track distribution.
+ * OperationId: UpdateTrackDistribution
+ * Endpoint: PUT /api/track-distributions/{id}
+ * @param {string} id - The GUID of the distribution
+ * @param {Object} distData
+ */
+export const updateDistribution = async (id, distData) => {
+  return axiosClient.put(`api/track-distributions/${id}`, distData);
+};
+
+/**
  * Delete a track distribution by ID.
  * OperationId: DeleteTrackDistribution
  * Endpoint: DELETE /api/track-distributions/{id}
@@ -147,3 +158,51 @@ export const createDistribution = async (distData) => {
 export const deleteDistribution = async (id) => {
   return axiosClient.delete(`api/track-distributions/${id}`);
 };
+
+// ==========================================
+// DSP ENDPOINTS
+// ==========================================
+
+/**
+ * Fetch all digital service providers (DSPs).
+ * OperationId: GetDsps
+ * Endpoint: GET /api/dsps
+ */
+export const fetchDsps = async () => {
+  return axiosClient.get('api/dsps');
+};
+
+/**
+ * Create a new digital service provider (DSP).
+ * OperationId: CreateDsp
+ * Endpoint: POST /api/dsps
+ * @param {Object} dspData
+ * @param {string} dspData.name
+ */
+export const createDsp = async (dspData) => {
+  return axiosClient.post('api/dsps', dspData);
+};
+
+/**
+ * Update an existing digital service provider (DSP).
+ * OperationId: UpdateDsp
+ * Endpoint: PUT /api/dsps/{id}
+ * @param {string} id - The GUID of the DSP
+ * @param {Object} dspData
+ * @param {string} dspData.name
+ */
+export const updateDsp = async (id, dspData) => {
+  return axiosClient.put(`api/dsps/${id}`, dspData);
+};
+
+/**
+ * Delete a digital service provider (DSP).
+ * OperationId: DeleteDsp
+ * Endpoint: DELETE /api/dsps/{id}
+ * @param {string} id - The GUID of the DSP
+ */
+export const deleteDsp = async (id) => {
+  return axiosClient.delete(`api/dsps/${id}`);
+};
+
+
