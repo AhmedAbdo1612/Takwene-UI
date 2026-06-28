@@ -10,6 +10,7 @@ import Spinner from './components/Spinner';
 import Skeleton from './components/Skeleton';
 import LandingPage from './components/LandingPage';
 import TracksManager from './components/TracksManager';
+import DashboardPage from './components/DashboardPage';
 import DistributionsManager from './components/DistributionsManager';
 import DspsManager from './components/DspsManager';
 
@@ -82,7 +83,7 @@ function DashboardLayout() {
           <nav className="space-y-1.5">
             {[
               { path: '/artists-registry', label: 'Artists Registry', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-              { path: '/dashboard', label: 'Dashboard Control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
+              { path: '/dashboard', label: 'Command Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
               { path: '/tracks', label: 'Track Catalog', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
               { path: '/distribution', label: 'DSP Deliveries', icon: 'M8.684 10.742l-2.777 1.111A1 1 0 015 11V5a1 1 0 01.908-.553l8-4A1 1 0 0115 1v6M17 11h.01M17 15h.01M17 19h.01M21 11h.01M21 15h.01M21 19h.01' },
               { path: '/dsps', label: 'DSP Registry', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z' },
@@ -170,7 +171,7 @@ function DashboardLayout() {
                 <nav className="space-y-1.5">
                   {[
                     { path: '/artists-registry', label: 'Artists Registry', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-                    { path: '/dashboard', label: 'Dashboard Control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
+                    { path: '/dashboard', label: 'Command Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
                     { path: '/tracks', label: 'Track Catalog', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
                     { path: '/distribution', label: 'DSP Deliveries', icon: 'M8.684 10.742l-2.777 1.111A1 1 0 015 11V5a1 1 0 01.908-.553l8-4A1 1 0 0115 1v6M17 11h.01M17 15h.01M17 19h.01M21 11h.01M21 15h.01M21 19h.01' },
                     { path: '/dsps', label: 'DSP Registry', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z' },
@@ -226,7 +227,7 @@ function DashboardLayout() {
             </button>
             <h2 className="text-sm sm:text-base md:text-xl font-bold tracking-tight truncate max-w-[120px] xs:max-w-[160px] sm:max-w-none">
               {currentPath === '/artists-registry' && 'Artists Registry'}
-              {currentPath === '/dashboard' && 'Dashboard Overview'}
+              {currentPath === '/dashboard' && 'Command Center'}
               {currentPath === '/tracks' && 'Music Track Catalog'}
               {currentPath === '/distribution' && 'DSP Distribution Status'}
               {currentPath === '/dsps' && 'DSP Registry'}
@@ -297,43 +298,6 @@ export default function App() {
   const location = useLocation();
   const currentPath = location.pathname;
   
-  // Insights / News Slider State
-  const [activeSlide, setActiveSlide] = useState(0);
-
-  const insights = [
-    {
-      title: "DSP Ingestion Upgrade",
-      description: "Spotify ingestion schemas updated to v4 protocol. High-res audio transcode profiles are now fully verified.",
-      badge: "System Update",
-      color: "from-purple-500/10 to-indigo-500/5 text-purple-600 dark:text-purple-400 border-purple-500/20"
-    },
-    {
-      title: "Apple Music Pop Trends",
-      description: "Arabic Pop streaming volume rose by 14.2% across North Africa DSP portals this past quarter.",
-      badge: "Market Analytics",
-      color: "from-rose-500/10 to-pink-500/5 text-rose-600 dark:text-rose-400 border-rose-500/20"
-    },
-    {
-      title: "Catalog Health Check",
-      description: "100% of ISRC mappings successfully verified and synced with Global Metadata Registry logs.",
-      badge: "Registry Sync",
-      color: "from-emerald-500/10 to-teal-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-    },
-    {
-      title: "API Performance Peak",
-      description: "Ingestion gateway endpoint latencies optimized by 180ms through edge cache route caching.",
-      badge: "Infrastructure",
-      color: "from-amber-500/10 to-orange-500/5 text-amber-600 dark:text-amber-400 border-amber-500/20"
-    }
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % insights.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Auth loading gate
   if (isLoading) {
     return (
@@ -359,170 +323,8 @@ export default function App() {
           {/* Artists Registry */}
           <Route path="/artists-registry" element={<ArtistsManager />} />
 
-          {/* Dashboard Control Overview */}
-          <Route path="/dashboard" element={
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-8"
-            >
-              {/* Top Section: Welcome Banner & Insights Slider */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                {/* Welcome Banner */}
-                <div className="lg:col-span-3 relative rounded-3xl bg-gradient-to-br from-primary via-primary-hover to-indigo-700 p-8 text-white shadow-lg overflow-hidden flex flex-col justify-between min-h-[220px]">
-                  <div className="relative z-10 space-y-4 max-w-xl">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold tracking-wider uppercase backdrop-blur-md">
-                        Active Session Mapped
-                      </span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-3xl font-extrabold tracking-tight">Welcome back, {user?.name || 'Manager'}!</h3>
-                      <p className="text-white/80 text-sm leading-relaxed">
-                        You are authenticated as a <strong>{user?.role}</strong>. Secure JWT Bearer tokens are stored locally and will rotate automatically on refresh calls.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="relative z-10 pt-4 flex gap-6 text-xs text-white/70 font-semibold border-t border-white/10 mt-4">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-white/50">Current Role</p>
-                      <p className="text-white font-bold">{user?.role || 'Administrator'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-white/50">Auth Gateway</p>
-                      <p className="text-white font-bold">API Sync Enabled</p>
-                    </div>
-                  </div>
-                  <div className="absolute right-0 bottom-0 -mb-16 -mr-16 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-                </div>
-
-                {/* Insights/News Slider */}
-                <div className="lg:col-span-2 bg-card border border-card-border rounded-3xl p-8 shadow-sm flex flex-col justify-between min-h-[220px] relative overflow-hidden">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Takwene Insights & News
-                      </span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    </div>
-
-                    <div className="relative h-[95px] overflow-hidden">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={activeSlide}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.3, ease: 'easeInOut' }}
-                          className="space-y-2 absolute inset-0"
-                        >
-                          <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${insights[activeSlide].color}`}>
-                            {insights[activeSlide].badge}
-                          </span>
-                          <h4 className="font-bold text-sm text-foreground leading-tight">
-                            {insights[activeSlide].title}
-                          </h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                            {insights[activeSlide].description}
-                          </p>
-                        </motion.div>
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* Dot Indicators */}
-                  <div className="flex items-center gap-1.5 pt-2">
-                    {insights.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveSlide(index)}
-                        className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                          activeSlide === index ? 'w-5 bg-primary' : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60'
-                        }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Statistics Cards Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  {
-                    label: "Catalog Size",
-                    value: "148 Tracks",
-                    change: "+12 releases this month",
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                      </svg>
-                    ),
-                    color: "text-purple-500 bg-purple-500/10 border-purple-500/20"
-                  },
-                  {
-                    label: "Artist Registry",
-                    value: "34 Artists",
-                    change: "Verified creators",
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    ),
-                    color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-                  },
-                  {
-                    label: "Active Outlets",
-                    value: "8 DSPs",
-                    change: "Spotify, Apple, Deezer",
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
-                    ),
-                    color: "text-sky-500 bg-sky-500/10 border-sky-500/20"
-                  },
-                  {
-                    label: "Successful Shipments",
-                    value: "412 Deliveries",
-                    change: "99.8% ingestion success",
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    ),
-                    color: "text-amber-500 bg-amber-500/10 border-amber-500/20"
-                  }
-                ].map((stat, i) => (
-                  <motion.div
-                    key={i}
-                    whileHover={{ y: -4, scale: 1.01 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-card border border-card-border rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 flex items-center justify-between group"
-                  >
-                    <div className="space-y-2">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                        {stat.label}
-                      </span>
-                      <h4 className="text-2xl font-black text-foreground tracking-tight">
-                        {stat.value}
-                      </h4>
-                      <span className="text-[10px] font-semibold text-muted-foreground block">
-                        {stat.change}
-                      </span>
-                    </div>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${stat.color} transition-transform duration-300 group-hover:scale-110 shrink-0 shadow-sm`}>
-                      {stat.icon}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          } />
+          {/* Command Center */}
+          <Route path="/dashboard" element={<DashboardPage />} />
 
           {/* Track Catalog */}
           <Route path="/tracks" element={<TracksManager />} />
