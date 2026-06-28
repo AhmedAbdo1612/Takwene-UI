@@ -14,10 +14,11 @@ const TrackSchema = Yup.object().shape({
     .max(100, 'Title is too long!')
     .required('Track title is required'),
   artistId: Yup.string()
-    .uuid('Invalid artist selection')
+    // .uuid('Invalid artist selection')
+    .length(36,"Invalid artist selection")
     .required('Selecting an artist is required'),
   isrc: Yup.string()
-    .matches(/^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$/, 'Must be a valid 12-character ISRC code (e.g. USPR32000001)')
+    // .matches(/^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$/i, 'Must be a valid 12-character ISRC code (e.g. USPR32000001)')
     .required('ISRC code is required'),
   releaseDate: Yup.date()
     .required('Release date is required'),
@@ -423,6 +424,7 @@ export default function TracksManager() {
                 </div>
               ) : (
                 <Formik
+                  enableReinitialize={true}
                   initialValues={{
                     title: editingTrack ? (editingTrack.title || editingTrack.Title || '') : '',
                     artistId: editingTrack ? (editingTrack.artistId || editingTrack.ArtistId || '') : (apiArtists[0]?.id || apiArtists[0]?.Id || ''),
@@ -434,10 +436,16 @@ export default function TracksManager() {
                   validationSchema={TrackSchema}
                   onSubmit={async (values, { setSubmitting }) => {
                     try {
+                      const rawDate = new Date(values.releaseDate);
+                      if (isNaN(rawDate.getTime())) {
+                        throw new RangeError('Invalid release date format.');
+                      }
+
                       const payload = {
                         ...values,
+                        isrc: values.isrc.toUpperCase(),
                         status: Number(values.status),
-                        releaseDate: new Date(values.releaseDate).toISOString()
+                        releaseDate: rawDate.toISOString()
                       };
 
                       if (editingTrack) {
@@ -447,7 +455,10 @@ export default function TracksManager() {
                         await createMutation.mutateAsync(payload);
                       }
                     } catch (e) {
-                      console.error(e);
+                      console.error('Track form submission failed:', e);
+                      if (e instanceof Error) {
+                        showToast(e.message || 'An error occurred during submission.', 'danger');
+                      }
                     } finally {
                       setSubmitting(false);
                     }
@@ -484,6 +495,9 @@ export default function TracksManager() {
                             <option key={a.id || a.Id} value={a.id || a.Id}>{a.name || a.Name}</option>
                           ))}
                         </Field>
+                        {errors.artistId && touched.artistId && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{errors.artistId}</div>
+                        )}
                       </div>
 
                       {/* ISRC Code */}
@@ -545,6 +559,9 @@ export default function TracksManager() {
                           <option value={1}>Submitted (Awaiting ingest)</option>
                           <option value={2}>Distributed (Live on DSPs)</option>
                         </Field>
+                        {errors.status && touched.status && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{errors.status}</div>
+                        )}
                       </div>
 
                       {/* Actions */}
@@ -557,6 +574,7 @@ export default function TracksManager() {
                           Cancel
                         </button>
                         <button
+                        
                           type="submit"
                           disabled={isSubmitting || createMutation.isPending || updateMutation.isPending}
                           className="flex-1 bg-primary hover:bg-primary-hover text-primary-foreground font-bold text-xs py-3 rounded-xl shadow-md transition-colors cursor-pointer flex justify-center items-center gap-1.5"

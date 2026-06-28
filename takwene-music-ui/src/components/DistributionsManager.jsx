@@ -415,6 +415,7 @@ export default function DistributionsManager() {
                 </div>
               ) : (
                 <Formik
+                  enableReinitialize={true}
                   initialValues={{
                     trackId: editingDist ? (editingDist.trackId || editingDist.TrackId || '') : (apiTracks[0]?.id || apiTracks[0]?.Id || ''),
                     dspId: editingDist ? (editingDist.dspId || editingDist.DspId || '') : (apiDsps[0]?.id || apiDsps[0]?.Id || ''),
@@ -426,10 +427,15 @@ export default function DistributionsManager() {
                   validationSchema={DistributionSchema}
                   onSubmit={async (values, { setSubmitting }) => {
                     try {
+                      const rawDate = new Date(values.submittedAt);
+                      if (isNaN(rawDate.getTime())) {
+                        throw new RangeError('Invalid submission date format.');
+                      }
+
                       const payload = {
                         ...values,
                         status: Number(values.status),
-                        submittedAt: new Date(values.submittedAt).toISOString()
+                        submittedAt: rawDate.toISOString()
                       };
 
                       if (editingDist) {
@@ -439,7 +445,10 @@ export default function DistributionsManager() {
                         await createMutation.mutateAsync(payload);
                       }
                     } catch (err) {
-                      console.error(err);
+                      console.error('Distribution form submission failed:', err);
+                      if (err instanceof Error) {
+                        showToast(err.message || 'An error occurred during submission.', 'danger');
+                      }
                     } finally {
                       setSubmitting(false);
                     }
