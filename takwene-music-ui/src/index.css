@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Theme variables for light mode */
+  --color-background: 248 247 252;
+  --color-foreground: 15 20 35;
+  --color-card-bg: 255 255 255;
+  --color-card-border: 235 230 245;
+  --color-primary: 124 58 237;          /* Violet-600 */
+  --color-primary-hover: 109 40 217;    /* Violet-700 */
+  --color-primary-foreground: 255 255 255;
+  --color-secondary: 79 70 229;         /* Indigo-600 */
+  --color-secondary-hover: 67 56 202;   /* Indigo-700 */
+  --color-secondary-foreground: 255 255 255;
+  --color-muted: 245 240 252;
+  --color-muted-foreground: 124 115 145;
+  --color-success: 16 185 129;
+  --color-warning: 245 158 11;
+  --color-danger: 239 68 68;
+  --color-border: 235 230 245;
+  --radius: 0.75rem;
+}
+
+:root.dark {
+  /* Theme variables for dark mode */
+  --color-background: 11 11 26;         /* Obsidian Navy */
+  --color-foreground: 240 240 250;      /* Ice Blue */
+  --color-card-bg: 18 18 38;            /* Royal Purple-Blue Card */
+  --color-card-border: 35 35 70;        /* Deep Lavender Border */
+  --color-primary: 168 85 247;          /* Royal Purple-500 */
+  --color-primary-hover: 192 132 252;   /* Purple-400 */
+  --color-primary-foreground: 255 255 255;
+  --color-secondary: 99 102 241;        /* Indigo-500 */
+  --color-secondary-hover: 129 140 248; /* Indigo-400 */
+  --color-secondary-foreground: 255 255 255;
+  --color-muted: 26 26 53;              /* Dark Navy-Indigo */
+  --color-muted-foreground: 156 163 195;
+  --color-success: 52 211 153;
+  --color-warning: 251 191 36;
+  --color-danger: 248 113 113;
+  --color-border: 35 35 70;
+}
