@@ -9,7 +9,8 @@ import ArtistsManager from './components/ArtistsManager';
 import Spinner from './components/Spinner';
 import Skeleton from './components/Skeleton';
 import LandingPage from './components/LandingPage';
-import { fetchTracks, fetchDistributions } from './api/api';
+import TracksManager from './components/TracksManager';
+import { fetchDistributions } from './api/api';
 
 // Protected Route wrapper component using Outlet for nested routes matching
 function ProtectedRoute() {
@@ -49,6 +50,157 @@ function PublicOnlyRoute() {
   return <Outlet />;
 }
 
+// Dashboard Layout nested container
+function DashboardLayout({ isFullScreenLoading }) {
+  const { theme, toggleTheme, isDark } = useTheme();
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  return (
+    <div className="flex-1 flex w-full bg-background text-foreground transition-colors duration-300 min-h-screen">
+      
+      {/* 1. Fullscreen Loader Overlay */}
+      {isFullScreenLoading && (
+        <Spinner 
+          fullScreen 
+          size="xl" 
+          message="Simulating secure API connection and token validation..." 
+        />
+      )}
+
+      {/* 2. Sidebar Navigation */}
+      <aside className="w-72 bg-card border-r border-card-border p-6 flex flex-col justify-between hidden md:flex shrink-0">
+        <div className="space-y-8">
+          {/* Logo Brand Header */}
+          <Link to="/" className="flex items-center gap-3 cursor-pointer">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center shadow-md">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-bold text-lg leading-tight tracking-tight">Takwene Music</h1>
+              <span className="text-xs text-primary font-bold tracking-wider uppercase">Distribution Hub</span>
+            </div>
+          </Link>
+
+          {/* Navigation Items */}
+          <nav className="space-y-1.5">
+            {[
+              { path: '/artists-registry', label: 'Artists Registry', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+              { path: '/dashboard', label: 'Dashboard Control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
+              { path: '/tracks', label: 'Track Catalog', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
+              { path: '/distribution', label: 'DSP Deliveries', icon: 'M8.684 10.742l-2.777 1.111A1 1 0 015 11V5a1 1 0 01.908-.553l8-4A1 1 0 0115 1v6M17 11h.01M17 15h.01M17 19h.01M21 11h.01M21 15h.01M21 19h.01' },
+            ].map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  currentPath === item.path
+                    ? 'bg-primary text-primary-foreground shadow-md font-bold'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                </svg>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer / API Integration Status */}
+        <div className="p-4 rounded-xl bg-muted/60 border border-card-border space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
+            <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">API Sync Enabled</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            Connected to ASP.NET gateway on port <code className="bg-muted px-1.5 py-0.5 rounded font-mono font-bold text-primary">5023</code>
+          </p>
+        </div>
+      </aside>
+
+      {/* 3. Main Dashboard Layout Area */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        
+        {/* Header Bar */}
+        <header className="h-20 bg-card border-b border-card-border px-6 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4">
+            {/* Mobile menu trigger */}
+            <button className="md:hidden p-2 rounded-lg hover:bg-muted">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h2 className="text-xl font-bold tracking-tight">
+              {currentPath === '/artists-registry' && 'Artists Registry'}
+              {currentPath === '/dashboard' && 'Dashboard Overview'}
+              {currentPath === '/tracks' && 'Music Track Catalog'}
+              {currentPath === '/distribution' && 'DSP Distribution Status'}
+            </h2>
+          </div>
+
+          {/* Header Actions */}
+          <div className="flex items-center gap-4">
+            
+            {/* Theme Toggle Button */}
+            <div className="flex items-center gap-2 border border-card-border bg-muted/30 px-3.5 py-1.5 rounded-full">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {isDark ? 'Royal Dark' : 'Vibrant Light'}
+              </span>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleTheme}
+                className="p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm transition-colors duration-200 cursor-pointer"
+                title={`Switch to theme`}
+              >
+                {isDark ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </motion.button>
+            </div>
+
+            {/* Profile Avatar & Info and Logout */}
+            <div className="flex items-center gap-3 pl-3 border-l border-card-border">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center font-bold text-sm text-white shadow-sm shrink-0">
+                {user?.name?.slice(0, 2).toUpperCase() || 'US'}
+              </div>
+              <div className="hidden lg:block text-left max-w-[150px] truncate">
+                <p className="text-xs font-bold leading-none truncate">{user?.name || 'User'}</p>
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase">{user?.role || 'Member'}</span>
+              </div>
+              
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-lg border border-card-border hover:bg-danger/10 hover:text-danger text-muted-foreground transition-all duration-150 ml-2 cursor-pointer"
+                title="Sign Out"
+              >
+                <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Container */}
+        <div className="p-6 md:p-8 max-w-6xl w-full mx-auto space-y-8 flex-1">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
   const { theme, toggleTheme, isDark } = useTheme();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -61,12 +213,6 @@ export default function App() {
   const [simulatedApiStatus, setSimulatedApiStatus] = useState('idle');
   
   // React Query hooks to consume live database endpoints
-  const { data: tracksData = [], isLoading: isTracksLoading, refetch: refetchTracks } = useQuery({
-    queryKey: ['tracks'],
-    queryFn: fetchTracks,
-    enabled: isAuthenticated && currentPath === '/tracks',
-  });
-
   const { data: distributionsData = [], isLoading: isDistLoading, refetch: refetchDistributions } = useQuery({
     queryKey: ['distributions'],
     queryFn: fetchDistributions,
@@ -74,7 +220,6 @@ export default function App() {
   });
 
   // No mock data fallbacks (Strictly using API data)
-  const displayTracks = Array.isArray(tracksData) ? tracksData : [];
   const displayDistributions = Array.isArray(distributionsData) ? distributionsData : [];
 
   // Trigger fullscreen loader for 2 seconds
@@ -108,153 +253,6 @@ export default function App() {
       </div>
     );
   }
-
-  // Dashboard Layout nested container
-  const DashboardLayout = () => {
-    return (
-      <div className="flex-1 flex w-full bg-background text-foreground transition-colors duration-300 min-h-screen">
-        
-        {/* 1. Fullscreen Loader Overlay */}
-        {isFullScreenLoading && (
-          <Spinner 
-            fullScreen 
-            size="xl" 
-            message="Simulating secure API connection and token validation..." 
-          />
-        )}
-
-        {/* 2. Sidebar Navigation */}
-        <aside className="w-72 bg-card border-r border-card-border p-6 flex flex-col justify-between hidden md:flex shrink-0">
-          <div className="space-y-8">
-            {/* Logo Brand Header */}
-            <Link to="/" className="flex items-center gap-3 cursor-pointer">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center shadow-md">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="font-bold text-lg leading-tight tracking-tight">Takwene Music</h1>
-                <span className="text-xs text-primary font-bold tracking-wider uppercase">Distribution Hub</span>
-              </div>
-            </Link>
-
-            {/* Navigation Items */}
-            <nav className="space-y-1.5">
-              {[
-                { path: '/artists-registry', label: 'Artists Registry', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-                { path: '/dashboard', label: 'Dashboard Control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
-                { path: '/tracks', label: 'Track Catalog', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
-                { path: '/distribution', label: 'DSP Deliveries', icon: 'M8.684 10.742l-2.777 1.111A1 1 0 015 11V5a1 1 0 01.908-.553l8-4A1 1 0 0115 1v6M17 11h.01M17 15h.01M17 19h.01M21 11h.01M21 15h.01M21 19h.01' },
-              ].map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    currentPath === item.path
-                      ? 'bg-primary text-primary-foreground shadow-md font-bold'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                  </svg>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Sidebar Footer / API Integration Status */}
-          <div className="p-4 rounded-xl bg-muted/60 border border-card-border space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
-              <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">API Sync Enabled</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Connected to ASP.NET gateway on port <code className="bg-muted px-1.5 py-0.5 rounded font-mono font-bold text-primary">5023</code>
-            </p>
-          </div>
-        </aside>
-
-        {/* 3. Main Dashboard Layout Area */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          
-          {/* Header Bar */}
-          <header className="h-20 bg-card border-b border-card-border px-6 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-4">
-              {/* Mobile menu trigger */}
-              <button className="md:hidden p-2 rounded-lg hover:bg-muted">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h2 className="text-xl font-bold tracking-tight">
-                {currentPath === '/artists-registry' && 'Artists Registry'}
-                {currentPath === '/dashboard' && 'Dashboard Overview'}
-                {currentPath === '/tracks' && 'Music Track Catalog'}
-                {currentPath === '/distribution' && 'DSP Distribution Status'}
-              </h2>
-            </div>
-
-            {/* Header Actions */}
-            <div className="flex items-center gap-4">
-              
-              {/* Theme Toggle Button */}
-              <div className="flex items-center gap-2 border border-card-border bg-muted/30 px-3.5 py-1.5 rounded-full">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  {isDark ? 'Royal Dark' : 'Vibrant Light'}
-                </span>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleTheme}
-                  className="p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm transition-colors duration-200 cursor-pointer"
-                  title={`Switch to theme`}
-                >
-                  {isDark ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                  )}
-                </motion.button>
-              </div>
-
-              {/* Profile Avatar & Info and Logout */}
-              <div className="flex items-center gap-3 pl-3 border-l border-card-border">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center font-bold text-sm text-white shadow-sm shrink-0">
-                  {user?.name?.slice(0, 2).toUpperCase() || 'US'}
-                </div>
-                <div className="hidden lg:block text-left max-w-[150px] truncate">
-                  <p className="text-xs font-bold leading-none truncate">{user?.name || 'User'}</p>
-                  <span className="text-[10px] text-muted-foreground font-semibold uppercase">{user?.role || 'Member'}</span>
-                </div>
-                
-                <button
-                  onClick={logout}
-                  className="p-1.5 rounded-lg border border-card-border hover:bg-danger/10 hover:text-danger text-muted-foreground transition-all duration-150 ml-2 cursor-pointer"
-                  title="Sign Out"
-                >
-                  <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </header>
-
-          {/* Content Container */}
-          <div className="p-6 md:p-8 max-w-6xl w-full mx-auto space-y-8 flex-1">
-            <Outlet />
-          </div>
-        </main>
-      </div>
-    );
-  };
-
   return (
     <Routes>
       {/* PUBLIC DEFAULT ROUTE */}
@@ -267,7 +265,7 @@ export default function App() {
 
       {/* PROTECTED ROUTES GROUP */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<DashboardLayout />}>
+        <Route element={<DashboardLayout isFullScreenLoading={isFullScreenLoading} />}>
           
           {/* Artists Registry */}
           <Route path="/artists-registry" element={<ArtistsManager />} />
@@ -428,87 +426,7 @@ export default function App() {
           } />
 
           {/* Track Catalog */}
-          <Route path="/tracks" element={
-            <motion.div
-              key="tracks"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-2xl font-bold tracking-tight">Track Catalog</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Overview of tracks, release statuses, and cover imagery.</p>
-                </div>
-                <button
-                  onClick={refetchTracks}
-                  disabled={isTracksLoading}
-                  className="flex items-center gap-1.5 border border-card-border bg-card hover:bg-muted text-foreground text-xs font-bold py-2 px-3.5 rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer"
-                >
-                  {isTracksLoading && <Spinner size="sm" />}
-                  Refresh Grid
-                </button>
-              </div>
-
-              {isTracksLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Skeleton variant="card" />
-                  <Skeleton variant="card" />
-                  <Skeleton variant="card" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {displayTracks.map((track) => {
-                    const id = track.id || track.Id || Math.random().toString();
-                    const title = track.title || track.Title || 'Untitled';
-                    const artistName = typeof track.artist === 'object' ? (track.artist?.name || track.artist?.Name) : (track.artist || track.Artist || 'Unknown Artist');
-                    const status = track.status || track.Status || 'Draft';
-                    const duration = track.duration || track.Duration || '0:00';
-                    const dspCount = track.dspCount !== undefined ? track.dspCount : (track.DspCount !== undefined ? track.DspCount : (track.trackDistributions?.length || track.TrackDistributions?.length || 0));
-                    const coverUrl = track.coverUrl || track.CoverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80';
-                    return (
-                      <div
-                        key={id}
-                        className="border border-card-border bg-card rounded-xl p-5 space-y-4 shadow-sm hover:border-primary/40 hover:shadow-md transition-all duration-200"
-                      >
-                        <div className="w-full aspect-video rounded-lg overflow-hidden relative group">
-                          <img
-                            src={coverUrl}
-                            alt={title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <span className="absolute bottom-2.5 right-2.5 bg-black/60 text-white font-mono text-[10px] px-1.5 py-0.5 rounded font-bold">
-                            {duration}
-                          </span>
-                        </div>
-
-                        <div className="space-y-1">
-                          <h4 className="font-bold text-sm leading-none">{title}</h4>
-                          <p className="text-xs text-muted-foreground">{artistName}</p>
-                        </div>
-
-                        <div className="flex justify-between items-center pt-2 border-t border-card-border/60">
-                          <span className="text-[10px] text-muted-foreground font-semibold">
-                            {dspCount > 0 ? `Delivered to ${dspCount} DSPs` : 'Not distributed'}
-                          </span>
-                          
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            status === 'Distributed' ? 'bg-success/15 text-success' :
-                            status === 'Submitted' ? 'bg-warning/15 text-warning' :
-                            'bg-muted-foreground/15 text-muted-foreground'
-                          }`}>
-                            {status}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </motion.div>
-          } />
+          <Route path="/tracks" element={<TracksManager />} />
 
           {/* DSP Deliveries */}
           <Route path="/distribution" element={

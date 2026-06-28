@@ -93,10 +93,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (userName, email, password) => {
     try {
       // Post registration data to /api/auth/register
-      const response = await axiosClient.post('api/auth/register', { name, email, password });
+      const response = await axiosClient.post('api/auth/register', { userName, email, password });
       
       const data = response.data || response;
       const { accessToken, refreshToken } = data;

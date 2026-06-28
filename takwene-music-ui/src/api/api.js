@@ -82,6 +82,35 @@ export const createTrack = async (trackData) => {
   return axiosClient.post('api/tracks', trackData);
 };
 
+/**
+ * Update an existing track metadata.
+ * Endpoint: PUT /api/tracks/{id}
+ * @param {string} id - GUID
+ * @param {Object} trackData
+ */
+export const updateTrack = async (id, trackData) => {
+  return axiosClient.put(`api/tracks/${id}`, trackData);
+};
+
+/**
+ * Delete a track from the catalog.
+ * Endpoint: DELETE /api/tracks/{id}
+ * @param {string} id - GUID
+ */
+export const deleteTrack = async (id) => {
+  return axiosClient.delete(`api/tracks/${id}`);
+};
+
+/**
+ * Fetch a single track by ID.
+ * OperationId: GetTrackById
+ * Endpoint: GET /api/tracks/{id}
+ * @param {string} id - GUID
+ */
+export const fetchTrack = async (id) => {
+  return axiosClient.get(`api/tracks/${id}`);
+};
+
 // ==========================================
 // DISTRIBUTION ENDPOINTS
 // ==========================================

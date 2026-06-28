@@ -14,7 +14,7 @@ export default function AuthPage() {
   // Form fields state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [userName, setUserName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Password visibility states
@@ -24,7 +24,7 @@ export default function AuthPage() {
   const clearForm = () => {
     setEmail('');
     setPassword('');
-    setName('');
+    setUserName('');
     setConfirmPassword('');
     setErrorMsg('');
     setShowPassword(false);
@@ -48,8 +48,8 @@ export default function AuthPage() {
     }
 
     if (!isLogin) {
-      if (!name) {
-        setErrorMsg('Please enter your full name.');
+      if (!userName) {
+        setErrorMsg('Please enter a valid username.');
         return;
       }
       if (password !== confirmPassword) {
@@ -80,7 +80,7 @@ export default function AuthPage() {
       if (isLogin) {
         await login(email, password);
       } else {
-        await register(name, email, password);
+        await register(userName, email, password);
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -333,8 +333,8 @@ export default function AuthPage() {
                   <input
                     type="text"
                     placeholder="e.g. Fairuz Rahal"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                     className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold pl-11 pr-4 py-3 rounded-xl outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:shadow-[0_0_22px_rgba(var(--color-primary),0.35)]"
                     required={!isLogin}
                   />
