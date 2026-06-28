@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Routes, Route, Link, useLocation, Navigate, Outlet } from 'react-router-dom';
-import axiosClient from './api/axiosClient';
 import { useTheme } from './context/ThemeContext';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './components/AuthPage';
@@ -10,20 +9,7 @@ import ArtistsManager from './components/ArtistsManager';
 import Spinner from './components/Spinner';
 import Skeleton from './components/Skeleton';
 import LandingPage from './components/LandingPage';
-
-// Mock database matching Domain structures in context.md
-const MOCK_TRACKS = [
-  { id: '101', title: 'Kifak Inta', artist: 'Fairuz', status: 'Distributed', duration: '3:45', dspCount: 3, coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80' },
-  { id: '102', title: 'Tamally Maak', artist: 'Amr Diab', status: 'Submitted', duration: '4:12', dspCount: 1, coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80' },
-  { id: '103', title: 'Rita', artist: 'Marcel Khalife', status: 'Draft', duration: '5:02', dspCount: 0, coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80' },
-];
-
-const MOCK_DISTRIBUTIONS = [
-  { trackId: '101', trackTitle: 'Kifak Inta', dsp: 'Spotify', status: 'Delivered', date: '2026-06-25' },
-  { trackId: '101', trackTitle: 'Kifak Inta', dsp: 'Apple Music', status: 'Delivered', date: '2026-06-25' },
-  { trackId: '101', trackTitle: 'Kifak Inta', dsp: 'Deezer', status: 'Delivered', date: '2026-06-26' },
-  { trackId: '102', trackTitle: 'Tamally Maak', dsp: 'Spotify', status: 'Pending', date: '2026-06-27' },
-];
+import { fetchTracks, fetchDistributions } from './api/api';
 
 // Protected Route wrapper component using Outlet for nested routes matching
 function ProtectedRoute() {
@@ -77,35 +63,19 @@ export default function App() {
   // React Query hooks to consume live database endpoints
   const { data: tracksData = [], isLoading: isTracksLoading, refetch: refetchTracks } = useQuery({
     queryKey: ['tracks'],
-    queryFn: async () => {
-      try {
-        const res = await axiosClient.get('api/tracks');
-        return Array.isArray(res) ? res : (res?.data || []);
-      } catch (err) {
-        console.error('Error fetching tracks:', err);
-        return [];
-      }
-    },
+    queryFn: fetchTracks,
     enabled: isAuthenticated && currentPath === '/tracks',
   });
 
   const { data: distributionsData = [], isLoading: isDistLoading, refetch: refetchDistributions } = useQuery({
     queryKey: ['distributions'],
-    queryFn: async () => {
-      try {
-        const res = await axiosClient.get('api/track-distributions');
-        return Array.isArray(res) ? res : (res?.data || []);
-      } catch (err) {
-        console.error('Error fetching distributions:', err);
-        return [];
-      }
-    },
+    queryFn: fetchDistributions,
     enabled: isAuthenticated && currentPath === '/distribution',
   });
 
-  // Fallback to MOCK data if backend is empty or offline
-  const displayTracks = tracksData.length > 0 ? tracksData : MOCK_TRACKS;
-  const displayDistributions = distributionsData.length > 0 ? distributionsData : MOCK_DISTRIBUTIONS;
+  // No mock data fallbacks (Strictly using API data)
+  const displayTracks = Array.isArray(tracksData) ? tracksData : [];
+  const displayDistributions = Array.isArray(distributionsData) ? distributionsData : [];
 
   // Trigger fullscreen loader for 2 seconds
   const triggerFullScreenLoader = () => {

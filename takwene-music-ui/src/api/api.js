@@ -1,0 +1,120 @@
+import axiosClient from './axiosClient';
+
+// ==========================================
+// ARTIST ENDPOINTS
+// ==========================================
+
+/**
+ * Fetch all artists from the backend API.
+ * OperationId: GetArtists
+ * Endpoint: GET /api/artists
+ */
+export const fetchArtists = async () => {
+  return axiosClient.get('api/artists');
+};
+
+/**
+ * Create a new artist profile.
+ * OperationId: CreateArtist
+ * Endpoint: POST /api/artists
+ * @param {Object} artistData
+ * @param {string} artistData.name
+ * @param {string} artistData.email
+ * @param {string} artistData.country
+ */
+export const createArtist = async (artistData) => {
+  return axiosClient.post('api/artists', artistData);
+};
+
+/**
+ * Update an existing artist profile.
+ * OperationId: UpdateArtist
+ * Endpoint: PUT /api/artists/{id}
+ * @param {string} id - The GUID of the artist
+ * @param {Object} updateData
+ * @param {string} updateData.name
+ * @param {string} updateData.email
+ * @param {string} updateData.country
+ */
+export const updateArtist = async (id, updateData) => {
+  return axiosClient.put(`api/artists/${id}`, updateData);
+};
+
+/**
+ * Delete an artist profile.
+ * OperationId: DeleteArtist
+ * Endpoint: DELETE /api/artists/{id}
+ * @param {string} id - The GUID of the artist
+ */
+export const deleteArtist = async (id) => {
+  return axiosClient.delete(`api/artists/${id}`);
+};
+
+// ==========================================
+// TRACK ENDPOINTS
+// ==========================================
+
+/**
+ * Fetch all tracks from the catalog.
+ * OperationId: GetTracks
+ * Endpoint: GET /api/tracks
+ * @param {Object} [params]
+ * @param {string} [params.genre]
+ * @param {string} [params.artistId]
+ */
+export const fetchTracks = async (params = {}) => {
+  return axiosClient.get('api/tracks', { params });
+};
+
+/**
+ * Create a new track.
+ * OperationId: CreateTrack
+ * Endpoint: POST /api/tracks
+ * @param {Object} trackData
+ * @param {string} trackData.title
+ * @param {string} trackData.artistId - GUID
+ * @param {string} trackData.isrc
+ * @param {string} trackData.releaseDate - ISO DateString
+ * @param {string} trackData.genre
+ * @param {number} trackData.status - Enum (0=Draft, 1=Submitted, 2=Distributed)
+ */
+export const createTrack = async (trackData) => {
+  return axiosClient.post('api/tracks', trackData);
+};
+
+// ==========================================
+// DISTRIBUTION ENDPOINTS
+// ==========================================
+
+/**
+ * Fetch all track distributions.
+ * OperationId: GetTrackDistributions
+ * Endpoint: GET /api/track-distributions
+ */
+export const fetchDistributions = async () => {
+  return axiosClient.get('api/track-distributions');
+};
+
+/**
+ * Create a new track distribution delivery.
+ * OperationId: CreateTrackDistribution
+ * Endpoint: POST /api/track-distributions
+ * @param {Object} distData
+ * @param {string} distData.trackId - GUID
+ * @param {string} distData.dspId - GUID
+ * @param {string} distData.submittedAt - ISO DateString
+ * @param {number} distData.status - Enum
+ */
+export const createDistribution = async (distData) => {
+  return axiosClient.post('api/track-distributions', distData);
+};
+
+/**
+ * Delete a track distribution by ID.
+ * OperationId: DeleteTrackDistribution
+ * Endpoint: DELETE /api/track-distributions/{id}
+ * @param {string} id - The GUID of the distribution
+ */
+export const deleteDistribution = async (id) => {
+  return axiosClient.delete(`api/track-distributions/${id}`);
+};
