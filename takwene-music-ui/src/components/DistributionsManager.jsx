@@ -46,6 +46,8 @@ export default function DistributionsManager() {
   const [editingDist, setEditingDist] = useState(null);
   const [deletingDist, setDeletingDist] = useState(null);
   const [toast, setToast] = useState(null);
+  const [globalError, setGlobalError] = useState(null);
+  const [serverErrors, setServerErrors] = useState({});
 
   // Fetch distributions, tracks, and DSPs from API
   const { data: apiDistributions = [], isLoading: isDistLoading, refetch: refetchDist } = useQuery({
@@ -157,11 +159,15 @@ export default function DistributionsManager() {
 
   const handleCreateClick = () => {
     setEditingDist(null);
+    setGlobalError(null);
+    setServerErrors({});
     setIsModalOpen(true);
   };
 
   const handleEditClick = (dist) => {
     setEditingDist(dist);
+    setGlobalError(null);
+    setServerErrors({});
     setIsModalOpen(true);
   };
 
@@ -426,6 +432,8 @@ export default function DistributionsManager() {
                   }}
                   validationSchema={DistributionSchema}
                   onSubmit={async (values, { setSubmitting }) => {
+                    setGlobalError(null);
+                    setServerErrors({});
                     try {
                       const rawDate = new Date(values.submittedAt);
                       if (isNaN(rawDate.getTime())) {
@@ -446,8 +454,19 @@ export default function DistributionsManager() {
                       }
                     } catch (err) {
                       console.error('Distribution form submission failed:', err);
-                      if (err instanceof Error) {
-                        showToast(err.message || 'An error occurred during submission.', 'danger');
+                      if (err.message) {
+                        setGlobalError(err.message);
+                      }
+
+                      if (err.errors) {
+                        const formErrors = {};
+                        for (const [key, val] of Object.entries(err.errors)) {
+                          const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                          formErrors[fieldName] = Array.isArray(val) ? val[0] : val;
+                        }
+                        setServerErrors(formErrors);
+                      } else if (!err.message && err instanceof Error) {
+                        showToast('An error occurred during submission.', 'danger');
                       }
                     } finally {
                       setSubmitting(false);
@@ -457,20 +476,31 @@ export default function DistributionsManager() {
                   {({ errors, touched, isSubmitting }) => (
                     <Form className="space-y-4">
                       
+                      {globalError && (
+                        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-start gap-2">
+                          <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>{globalError}</span>
+                        </div>
+                      )}
+
                       {/* Track Selection */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Catalog Track</label>
                         <Field
                           as="select"
                           name="trackId"
-                          className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+                          className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
+                            (errors.trackId && touched.trackId) || serverErrors.trackId ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                          }`}
                         >
                           {apiTracks.map((t) => (
                             <option key={t.id || t.Id} value={t.id || t.Id}>{t.title || t.Title}</option>
                           ))}
                         </Field>
-                        {errors.trackId && touched.trackId && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.trackId}</div>
+                        {((errors.trackId && touched.trackId) || serverErrors.trackId) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.trackId || errors.trackId}</div>
                         )}
                       </div>
 
@@ -480,14 +510,16 @@ export default function DistributionsManager() {
                         <Field
                           as="select"
                           name="dspId"
-                          className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+                          className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
+                            (errors.dspId && touched.dspId) || serverErrors.dspId ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                          }`}
                         >
                           {apiDsps.map((d) => (
                             <option key={d.id || d.Id} value={d.id || d.Id}>{d.name || d.Name}</option>
                           ))}
                         </Field>
-                        {errors.dspId && touched.dspId && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.dspId}</div>
+                        {((errors.dspId && touched.dspId) || serverErrors.dspId) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.dspId || errors.dspId}</div>
                         )}
                       </div>
 
@@ -498,11 +530,11 @@ export default function DistributionsManager() {
                           type="datetime-local"
                           name="submittedAt"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.submittedAt && touched.submittedAt ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                            (errors.submittedAt && touched.submittedAt) || serverErrors.submittedAt ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
-                        {errors.submittedAt && touched.submittedAt && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.submittedAt}</div>
+                        {((errors.submittedAt && touched.submittedAt) || serverErrors.submittedAt) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.submittedAt || errors.submittedAt}</div>
                         )}
                       </div>
 
@@ -512,12 +544,17 @@ export default function DistributionsManager() {
                         <Field
                           as="select"
                           name="status"
-                          className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+                          className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
+                            (errors.status && touched.status) || serverErrors.status ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                          }`}
                         >
                           <option value={0}>Pending (Queued / processing)</option>
                           <option value={1}>Live (Published / available)</option>
                           <option value={2}>Rejected (Failed validation)</option>
                         </Field>
+                        {((errors.status && touched.status) || serverErrors.status) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.status || errors.status}</div>
+                        )}
                       </div>
 
                       {/* Modal Form Actions */}

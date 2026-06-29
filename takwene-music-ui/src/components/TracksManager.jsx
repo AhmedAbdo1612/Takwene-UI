@@ -47,6 +47,8 @@ export default function TracksManager() {
   const [editingTrack, setEditingTrack] = useState(null);
   const [deletingTrack, setDeletingTrack] = useState(null);
   const [toast, setToast] = useState(null);
+  const [serverErrors, setServerErrors] = useState({});
+  const [globalError, setGlobalError] = useState(null);
 
   // Fetch Tracks from API (GET /api/tracks)
   const { data: apiTracks = [], isLoading: isTracksLoading, refetch: refetchTracks } = useQuery({
@@ -161,11 +163,15 @@ export default function TracksManager() {
 
   const handleEditClick = (track) => {
     setEditingTrack(track);
+    setServerErrors({});
+    setGlobalError(null);
     setIsModalOpen(true);
   };
 
   const handleCreateClick = () => {
     setEditingTrack(null);
+    setServerErrors({});
+    setGlobalError(null);
     setIsModalOpen(true);
   };
 
@@ -435,6 +441,8 @@ export default function TracksManager() {
                   }}
                   validationSchema={TrackSchema}
                   onSubmit={async (values, { setSubmitting }) => {
+                    setServerErrors({});
+                    setGlobalError(null);
                     try {
                       const rawDate = new Date(values.releaseDate);
                       if (isNaN(rawDate.getTime())) {
@@ -456,8 +464,20 @@ export default function TracksManager() {
                       }
                     } catch (e) {
                       console.error('Track form submission failed:', e);
-                      if (e instanceof Error) {
-                        showToast(e.message || 'An error occurred during submission.', 'danger');
+                      
+                      if (e.message) {
+                        setGlobalError(e.message);
+                      }
+
+                      if (e.errors) {
+                        const formErrors = {};
+                        for (const [key, val] of Object.entries(e.errors)) {
+                          const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                          formErrors[fieldName] = Array.isArray(val) ? val[0] : val;
+                        }
+                        setServerErrors(formErrors);
+                      } else if (!e.message && e instanceof Error) {
+                        showToast('An error occurred during submission.', 'danger');
                       }
                     } finally {
                       setSubmitting(false);
@@ -467,6 +487,15 @@ export default function TracksManager() {
                   {({ errors, touched, isSubmitting }) => (
                     <Form className="space-y-4">
                       
+                      {globalError && (
+                        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-start gap-2">
+                          <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>{globalError}</span>
+                        </div>
+                      )}
+
                       {/* Title */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Track Title</label>
@@ -475,11 +504,11 @@ export default function TracksManager() {
                           name="title"
                           placeholder="e.g. Tamally Maak"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.title && touched.title ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                            (errors.title && touched.title) || serverErrors.title ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
-                        {errors.title && touched.title && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.title}</div>
+                        {((errors.title && touched.title) || serverErrors.title) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.title || errors.title}</div>
                         )}
                       </div>
 
@@ -489,14 +518,16 @@ export default function TracksManager() {
                         <Field
                           as="select"
                           name="artistId"
-                          className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+                          className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
+                            (errors.artistId && touched.artistId) || serverErrors.artistId ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                          }`}
                         >
                           {apiArtists.map((a) => (
                             <option key={a.id || a.Id} value={a.id || a.Id}>{a.name || a.Name}</option>
                           ))}
                         </Field>
-                        {errors.artistId && touched.artistId && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.artistId}</div>
+                        {((errors.artistId && touched.artistId) || serverErrors.artistId) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.artistId || errors.artistId}</div>
                         )}
                       </div>
 
@@ -508,11 +539,11 @@ export default function TracksManager() {
                           name="isrc"
                           placeholder="e.g. USPR32000001"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.isrc && touched.isrc ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                            (errors.isrc && touched.isrc) || serverErrors.isrc ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
-                        {errors.isrc && touched.isrc && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.isrc}</div>
+                        {((errors.isrc && touched.isrc) || serverErrors.isrc) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.isrc || errors.isrc}</div>
                         )}
                       </div>
 
@@ -523,11 +554,11 @@ export default function TracksManager() {
                           type="date"
                           name="releaseDate"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.releaseDate && touched.releaseDate ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                            (errors.releaseDate && touched.releaseDate) || serverErrors.releaseDate ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
-                        {errors.releaseDate && touched.releaseDate && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.releaseDate}</div>
+                        {((errors.releaseDate && touched.releaseDate) || serverErrors.releaseDate) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.releaseDate || errors.releaseDate}</div>
                         )}
                       </div>
 
@@ -539,11 +570,11 @@ export default function TracksManager() {
                           name="genre"
                           placeholder="e.g. Arabic Pop, Oud"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.genre && touched.genre ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                            (errors.genre && touched.genre) || serverErrors.genre ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
-                        {errors.genre && touched.genre && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.genre}</div>
+                        {((errors.genre && touched.genre) || serverErrors.genre) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.genre || errors.genre}</div>
                         )}
                       </div>
 
@@ -553,14 +584,16 @@ export default function TracksManager() {
                         <Field
                           as="select"
                           name="status"
-                          className="w-full bg-muted/40 border border-card-border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+                          className={`w-full bg-muted/40 border text-foreground text-sm font-semibold px-4 py-3 rounded-xl outline-none transition-all duration-300 ${
+                            (errors.status && touched.status) || serverErrors.status ? 'border-danger focus:ring-2 focus:ring-danger/10' : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
+                          }`}
                         >
                           <option value={0}>Draft (Not published)</option>
                           <option value={1}>Submitted (Awaiting ingest)</option>
                           <option value={2}>Distributed (Live on DSPs)</option>
                         </Field>
-                        {errors.status && touched.status && (
-                          <div className="text-[10px] text-danger font-bold pl-1">{errors.status}</div>
+                        {((errors.status && touched.status) || serverErrors.status) && (
+                          <div className="text-[10px] text-danger font-bold pl-1">{serverErrors.status || errors.status}</div>
                         )}
                       </div>
 

@@ -24,6 +24,8 @@ export default function DspsManager() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deletingDsp, setDeletingDsp] = useState(null);
   const [toast, setToast] = useState(null);
+  const [globalError, setGlobalError] = useState(null);
+  const [serverErrors, setServerErrors] = useState({});
 
   // Fetch DSPs from API
   const { data: apiDsps = [], isLoading, refetch } = useQuery({
@@ -147,7 +149,11 @@ export default function DspsManager() {
           </button>
 
           <button
-            onClick={() => setIsCreateOpen(true)}
+            onClick={() => {
+              setGlobalError(null);
+              setServerErrors({});
+              setIsCreateOpen(true);
+            }}
             className="bg-primary hover:bg-primary-hover text-primary-foreground font-bold text-xs py-2.5 px-4.5 rounded-xl shadow-md flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
           >
             <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -234,7 +240,11 @@ export default function DspsManager() {
                   {/* Action buttons */}
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => setEditingDsp(dsp)}
+                      onClick={() => {
+                        setGlobalError(null);
+                        setServerErrors({});
+                        setEditingDsp(dsp);
+                      }}
                       className="p-2 rounded-lg border border-card-border hover:bg-muted text-muted-foreground hover:text-primary transition-all duration-200 cursor-pointer"
                       title="Edit DSP details"
                     >
@@ -297,6 +307,8 @@ export default function DspsManager() {
                 }}
                 validationSchema={DspSchema}
                 onSubmit={async (values, { setSubmitting }) => {
+                  setGlobalError(null);
+                  setServerErrors({});
                   try {
                     if (editingDsp) {
                       await updateMutation.mutateAsync({
@@ -307,7 +319,22 @@ export default function DspsManager() {
                       await createMutation.mutateAsync(values);
                     }
                   } catch (e) {
-                    console.error(e);
+                    console.error('DSP form submission failed:', e);
+                    
+                    if (e.message) {
+                      setGlobalError(e.message);
+                    }
+
+                    if (e.errors) {
+                      const formErrors = {};
+                      for (const [key, val] of Object.entries(e.errors)) {
+                        const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                        formErrors[fieldName] = Array.isArray(val) ? val[0] : val;
+                      }
+                      setServerErrors(formErrors);
+                    } else if (!e.message && e instanceof Error) {
+                      showToast('An error occurred during submission.', 'danger');
+                    }
                   } finally {
                     setSubmitting(false);
                   }
@@ -316,6 +343,15 @@ export default function DspsManager() {
                 {({ errors, touched, isSubmitting, values }) => (
                   <Form className="space-y-4">
                     
+                    {globalError && (
+                      <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-start gap-2">
+                        <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{globalError}</span>
+                      </div>
+                    )}
+
                     {/* Name Field */}
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Provider Name</label>
@@ -330,21 +366,21 @@ export default function DspsManager() {
                           name="name"
                           placeholder="e.g. Spotify"
                           className={`w-full bg-muted/40 border text-foreground text-sm font-semibold pl-11 pr-11 py-3 rounded-xl outline-none transition-all duration-300 ${
-                            errors.name && touched.name
+                            (errors.name && touched.name) || serverErrors.name
                               ? 'border-danger focus:ring-2 focus:ring-danger/10'
                               : 'border-card-border focus:border-primary focus:ring-4 focus:ring-primary/15'
                           }`}
                         />
                       </div>
                       <AnimatePresence>
-                        {errors.name && touched.name && (
+                        {((errors.name && touched.name) || serverErrors.name) && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             className="text-[10px] text-danger font-bold pl-1 mt-0.5"
                           >
-                            {errors.name}
+                            {serverErrors.name || errors.name}
                           </motion.div>
                         )}
                       </AnimatePresence>
