@@ -24,3 +24,4 @@ lerna-debug.log*
 *.sw?
 package-lock.json
 **/package-lock.json
+frontend_abstract.md

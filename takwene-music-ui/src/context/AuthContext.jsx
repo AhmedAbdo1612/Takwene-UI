@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
       const loggedUser = {
         id: decoded?.sub || decoded?.nameid || '',
         email: decoded?.email || email,
-        name: decoded?.name || decoded?.unique_name || 'User',
+        name: data?.fullName || decoded?.unique_name || 'User',
         role: decoded?.role || 'User',
       };
 
@@ -93,10 +93,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (userName, email, password) => {
+  const register = async (fullName, email, password) => {
     try {
       // Post registration data to /api/auth/register
-      const response = await axiosClient.post('api/auth/register', { userName, email, password });
+      const response = await axiosClient.post('api/auth/register', { fullName, email, password });
       
       const data = response.data || response;
       const { accessToken, refreshToken } = data;
@@ -109,8 +109,8 @@ export function AuthProvider({ children }) {
       const decoded = decodeToken(accessToken);
       const loggedUser = {
         id: decoded?.sub || decoded?.nameid || '',
-        email: decoded?.email || email,
-        name: decoded?.name || decoded?.unique_name || name,
+        email: data?.email || email,
+        name: data?.fullName || decoded?.unique_name || name,
         role: decoded?.role || 'User',
       };
 
